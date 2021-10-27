@@ -5,8 +5,6 @@ contract Auction {
   address private owner;
   uint256 public startTime;
   uint256 public endTime;
-  uint256 public highestBid;
-  address public highestBidder;
 
   // Properties
   struct House {
@@ -15,8 +13,13 @@ contract Auction {
     string houseLocation;
   }
 
+  struct HighestBid {
+    uint256 bidAmount;
+    address bidder;
+  }
+
   House public newHouse;
-  address[] public bidders;
+  HighestBid public highestBid;
   mapping(address => uint256) public bids;
 
   // Modifiers
@@ -52,14 +55,13 @@ contract Auction {
 
   function makeBid() public payable isOngoing() notOwner() returns (bool) {
     uint256 bidAmount = bids[msg.sender] + msg.value;
-    require(bidAmount > highestBid, 'Bid error: Make a higher Bid.');
+    require(bidAmount > highestBid.bidAmount, 'Bid error: Make a higher Bid.');
 
-    highestBidder = msg.sender;
-    highestBid = msg.value;
-    bidders.push(msg.sender);
+    highestBid.bidder = msg.sender;
+    highestBid.bidAmount = bidAmount;
     bids[msg.sender] = bidAmount;
 
-    emit LogBid(msg.sender, highestBid);
+    emit LogBid(msg.sender, bidAmount);
     return true;
   }
 
@@ -72,5 +74,10 @@ contract Auction {
 
     emit LogWithdrawal(msg.sender, amount);
     return true;
+  }
+
+  function fetchHighestBid() public view returns (HighestBid memory) {
+    HighestBid memory _highestBid = highestBid; 
+    return _highestBid;
   }
 }
