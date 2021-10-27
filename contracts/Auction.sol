@@ -47,7 +47,7 @@ contract Auction {
   constructor () {
     owner = msg.sender;
     startTime = block.timestamp;
-    endTime = block.timestamp * 1 hours;
+    endTime = block.timestamp + 1 hours;
     newHouse.houseColor = '#FFFFFF';
     newHouse.houseLocation = 'Lagos, Nigeria';
     newHouse.houseType = 'Duplex';
@@ -65,11 +65,13 @@ contract Auction {
     return true;
   }
 
-  function withdraw() public notOngoing() isOwner() returns (bool) {
-    uint256 amount = bids[msg.sender];
-    
-    bids[msg.sender] = 0;
-    (bool success, ) = msg.sender.call{ value: amount }("");
+  function withdraw() public notOngoing() isOwner() returns (bool) { 
+    uint256 amount = highestBid.bidAmount; 
+    bids[highestBid.bidder] = 0;
+    highestBid.bidder = address(0);
+    highestBid.bidAmount = 0;
+
+    (bool success, ) = payable(owner).call{ value: amount }("");
     require(success, 'Withdrawal failed.');
 
     emit LogWithdrawal(msg.sender, amount);
@@ -79,5 +81,9 @@ contract Auction {
   function fetchHighestBid() public view returns (HighestBid memory) {
     HighestBid memory _highestBid = highestBid; 
     return _highestBid;
+  }
+
+  function getOwner() public view returns (address) {
+    return owner;
   }
 }
