@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
 
-const AuctionContractAddress = '0x50997157f4aff72b1dCE8D26D63bba2eA656694B';
+const AuctionContractAddress = '0xEdEa9c2815e081D904a57Ed6dBEA40A4eCC3f72c';
 const emptyAddress = '0x0000000000000000000000000000000000000000';
 
 function App() {
@@ -24,7 +24,6 @@ function App() {
   async function requestAccount() {
     const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
     setAccount(account[0]);
-    console.log('success fetching account: ', account[0]);
   }
 
   async function fetchHighestBid() {
@@ -35,7 +34,6 @@ function App() {
         const { bidAmount, bidder } = highestBid;
         setHighestBid(parseFloat(formatEther(bidAmount.toString())).toPrecision(4));
         setHighestBidder(bidder.toLowerCase());
-        console.log('success fetching highest bid: ', highestBid);
       } catch (e) {
         console.log('error fetching highest bid: ', e);
       }
@@ -48,7 +46,6 @@ function App() {
       try {
         const myBid = await contract.bids(account);
         setMyBid(parseFloat(formatEther(myBid.toString())).toPrecision(4));
-        console.log('success fetching my bid: ', myBid);
       } catch (e) {
         console.log('error fetching my bid: ', e);
       }
@@ -61,21 +58,19 @@ function App() {
       try {
         const owner = await contract.getOwner();
         setIsOwner(owner.toLowerCase() === account);
-        console.log('success fetching owner: ', owner);
       } catch (e) {
         console.log('error fetching owner: ', e);
       }
     }
   }
 
-  async function submitHandler(event) {
+  async function submitBid(event) {
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
       const contract = await initializeProvider();
       try {
         const wei = parseEther(amount);
         await contract.makeBid({ value: wei });
-        console.log('success making bid.');
         contract.on('LogBid', (_, __) => {
           fetchMyBid();
           fetchHighestBid();
@@ -141,7 +136,7 @@ function App() {
             : highestBidder}
         </p>
         {!isOwner ? (
-          <form onSubmit={submitHandler}>
+          <form onSubmit={submitBid}>
             <input
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
