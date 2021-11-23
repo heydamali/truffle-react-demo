@@ -71,7 +71,7 @@ function App() {
       try {
         const wei = parseEther(amount);
         await contract.makeBid({ value: wei });
-        contract.on('LogBid', (_, __) => {
+        contract.on('LogBid', () => {
           fetchMyBid();
           fetchHighestBid();
         });
@@ -84,7 +84,7 @@ function App() {
   async function withdraw() {
     if (typeof window.ethereum !== 'undefined') {
       const contract = await initializeProvider();
-      contract.on('LogWithdrawal', (_) => {
+      contract.on('LogWithdrawal', () => {
         fetchMyBid();
         fetchHighestBid();
       });

@@ -2,11 +2,11 @@
 pragma solidity 0.8.9;
 
 contract Auction {
+  // Properties
   address private owner;
   uint256 public startTime;
   uint256 public endTime;
-
-  // Properties
+  mapping(address => uint256) public bids;
   struct House {
     string houseType;
     string houseColor;
@@ -20,7 +20,6 @@ contract Auction {
 
   House public newHouse;
   HighestBid public highestBid;
-  mapping(address => uint256) public bids;
 
   // Modifiers
   modifier isOngoing() {
